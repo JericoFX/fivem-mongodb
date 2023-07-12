@@ -74,13 +74,13 @@ async function init(url, databaseName, collections) {
 })();
 
 async function getDatabaseInstance() {
-  //  await hasInitialized();
+  await hasInitialized();
   return db;
 }
 exports("getDatabaseInstance", getDatabaseInstance);
 
 async function doesCollectionExist(collection) {
-  //  await hasInitialized();
+  await hasInitialized();
   const currentCollections = await db.collections();
   const index = await currentCollections.findIndex(
     (x) => x.collectionName === collection
@@ -94,7 +94,7 @@ async function createCollection(collection, returnFalseIfExists = false) {
     console.error("Failed to specify collections");
     return false;
   }
-  //  await hasInitialized();
+  await hasInitialized();
   const currentCollections = await db.collections();
   const index = await currentCollections.findIndex(
     (x) => x.collectionName === collection
@@ -167,7 +167,7 @@ async function fetchAllByField(key, value, collectionName) {
     return [];
   }
 
-  //  await hasInitialized();
+  await hasInitialized();
 
   if (key === "_id" && typeof key !== "object") {
     value = new mongo.ObjectId(value);
@@ -243,7 +243,7 @@ async function fetchWithSearch(searchTerm, collectionName) {
     return [];
   }
 
-  //  await hasInitialized();
+  await hasInitialized();
 
   const collection = await db.collection(collectionName);
   let results;
@@ -277,7 +277,7 @@ async function insertData(document, collection, returnDocument = false) {
     console.error(`Failed to specify document or collection for insertData.`);
     return null;
   }
-  //  await hasInitialized();
+  await hasInitialized();
 
   const result = await db.collection(collection).insertOne(document);
 
@@ -307,7 +307,7 @@ async function updatePartialData(_id, data, collection, unset) {
     return null;
   }
 
-  //  await hasInitialized();
+  await hasInitialized();
 
   if (typeof _id !== "object") {
     _id = new mongo.ObjectId(_id);
@@ -352,7 +352,7 @@ async function updatePartialDataRaw(_id, rawData, collection) {
     return null;
   }
 
-  //  await hasInitialized();
+  await hasInitialized();
 
   if (typeof _id !== "object") {
     _id = new mongo.ObjectId(_id);
@@ -387,7 +387,7 @@ async function removePartialData(_id, data, collection) {
     return null;
   }
 
-  //  await hasInitialized();
+  await hasInitialized();
 
   if (typeof _id !== "object") {
     _id = new mongo.ObjectId(_id);
@@ -421,7 +421,7 @@ async function deleteById(_id, collection) {
     return false;
   }
 
-  //  await hasInitialized();
+  await hasInitialized();
 
   if (typeof _id !== "object") {
     _id = new mongo.ObjectId(_id);
@@ -450,7 +450,7 @@ async function selectData(collection, keys) {
     return [];
   }
 
-  //  await hasInitialized();
+  await hasInitialized();
 
   const selectData = {
     _id: 1,
@@ -483,7 +483,7 @@ async function selectWithElementMatch(collection, propertyName, elementMatch) {
     return [];
   }
 
-  //  await hasInitialized();
+  await hasInitialized();
 
   const currentCollection = await db.collection(collection);
 
@@ -515,7 +515,7 @@ async function updateDataByFieldMatch(key, value, data, collection) {
     return false;
   }
 
-  //  await hasInitialized();
+  await hasInitialized();
 
   if (key === "_id" && typeof value !== "object") {
     value = new mongo.ObjectId(value);
@@ -545,7 +545,7 @@ async function dropCollection(collectionName) {
     return false;
   }
 
-  //  await hasInitialized();
+  await hasInitialized();
 
   let res = false;
 
@@ -573,7 +573,7 @@ exports("dropCollection", dropCollection);
  * @memberof Database
  */
 async function dropDatabase() {
-  //  await hasInitialized();
+  await hasInitialized();
 
   return await client
     .db()
@@ -608,353 +608,3 @@ async function close() {
   isInitialized = false;
 }
 exports("close", close);
-// import { MongoClient } from "mongodb";
-// import { safeObjectArgument, safeCallback, exportDocuments } from "./utils";
-
-// const url = GetConvar("mongodb_url", "changeme");
-// const dbName = GetConvar("mongodb_database", "changeme");
-
-// let db;
-
-// if (url != "changeme" && dbName != "changeme") {
-//   new MongoClient.connect(
-//     url,
-//     { useNewUrlParser: true, useUnifiedTopology: true },
-//     function (err, client) {
-//       if (err)
-//         return console.log(
-//           "[MongoDB][ERROR] Failed to connect: " + err.message
-//         );
-//       db = client.db(dbName);
-
-//       console.log(`[MongoDB] Connected to database "${dbName}".`);
-//       emit("onDatabaseConnect", dbName);
-//     }
-//   );
-// } else {
-//   if (url == "changeme")
-//     console.log(`[MongoDB][ERROR] Convar "mongodb_url" not set (see README)`);
-//   if (dbName == "changeme")
-//     console.log(
-//       `[MongoDB][ERROR] Convar "mongodb_database" not set (see README)`
-//     );
-// }
-
-// function checkDatabaseReady() {
-//   if (!db) {
-//     console.log(`[MongoDB][ERROR] Database is not connected.`);
-//     return false;
-//   }
-//   return true;
-// }
-
-// function checkParams(params) {
-//   return params !== null && typeof params === "object";
-// }
-
-// function getParamsCollection(params) {
-//   if (!params.collection) return;
-//   return db.collection(params.collection);
-// }
-
-// /* MongoDB methods wrappers */
-
-// /**
-//  * MongoDB insert method
-//  * @param {Object} params - Params object
-//  * @param {Array}  params.documents - An array of documents to insert.
-//  * @param {Object} params.options - Options passed to insert.
-//  */
-// async function dbInsert(params, callback) {
-//   if (!checkDatabaseReady()) return;
-//   if (!checkParams(params))
-//     return console.log(
-//       `[MongoDB][ERROR] exports.insert: Invalid params object.`
-//     );
-
-//   let collection = getParamsCollection(params);
-//   if (!collection)
-//     return console.log(
-//       `[MongoDB][ERROR] exports.insert: Invalid collection "${params.collection}"`
-//     );
-
-//   let documents = params.documents;
-//   if (!documents || !Array.isArray(documents))
-//     return console.log(
-//       `[MongoDB][ERROR] exports.insert: Invalid 'params.documents' value. Expected object or array of objects.`
-//     );
-
-//   const options = safeObjectArgument(params.options);
-
-//   await collection.insertMany(documents, options, (err, result) => {
-//     if (err) {
-//       console.log(`[MongoDB][ERROR] exports.insert: Error "${err.message}".`);
-//       safeCallback(callback, false, err.message);
-//       return;
-//     }
-//     let arrayOfIds = [];
-//     // Convert object to an array
-//     for (let key in result.insertedIds) {
-//       if (result.insertedIds.hasOwnProperty(key)) {
-//         arrayOfIds[parseInt(key)] = result.insertedIds[key].toString();
-//       }
-//     }
-//     safeCallback(callback, true, result.insertedCount, arrayOfIds);
-//   });
-//   process._tickCallback();
-// }
-
-// /**
-//  * MongoDB find method
-//  * @param {Object} params - Params object
-//  * @param {Object} params.query - Query object.
-//  * @param {Object} params.options - Options passed to insert.
-//  * @param {number} params.limit - Limit documents count.
-//  */
-// function dbFind(params, callback) {
-//   if (!checkDatabaseReady()) return;
-//   if (!checkParams(params))
-//     return console.log(`[MongoDB][ERROR] exports.find: Invalid params object.`);
-
-//   let collection = getParamsCollection(params);
-//   if (!collection)
-//     return console.log(
-//       `[MongoDB][ERROR] exports.insert: Invalid collection "${params.collection}"`
-//     );
-
-//   const query = safeObjectArgument(params.query);
-//   const options = safeObjectArgument(params.options);
-
-//   let cursor = collection.find(query, options);
-//   if (params.limit) cursor = cursor.limit(params.limit);
-//   cursor.toArray((err, documents) => {
-//     if (err) {
-//       console.log(`[MongoDB][ERROR] exports.find: Error "${err.message}".`);
-//       safeCallback(callback, false, err.message);
-//       return;
-//     }
-//     safeCallback(callback, true, exportDocuments(documents));
-//   });
-//   process._tickCallback();
-// }
-
-// /**
-//  * MongoDB update method
-//  * @param {Object} params - Params object
-//  * @param {Object} params.query - Filter query object.
-//  * @param {Object} params.update - Update query object.
-//  * @param {Object} params.options - Options passed to insert.
-//  */
-// async function dbUpdateOne(params, callback) {
-//   if (!checkDatabaseReady()) return;
-//   if (!checkParams(params))
-//     return console.log(
-//       `[MongoDB][ERROR] exports.update: Invalid params object.`
-//     );
-
-//   let collection = getParamsCollection(params);
-//   if (!collection)
-//     return console.log(
-//       `[MongoDB][ERROR] exports.insert: Invalid collection "${params.collection}"`
-//     );
-
-//   query = safeObjectArgument(params.query);
-//   update = safeObjectArgument(params.update);
-//   options = safeObjectArgument(params.options);
-
-//   const cb = (err, res) => {
-//     if (err) {
-//       console.log(`[MongoDB][ERROR] exports.update: Error "${err.message}".`);
-//       safeCallback(callback, false, err.message);
-//       return;
-//     }
-//     safeCallback(callback, true, res.result.nModified);
-//   };
-//   try {
-//     return await collection.updateOne(query, update, options, cb);
-//   } catch (error) {
-//     console.log(`[MongoDB][ERROR] updateOne: Error "${err.message}".`);
-//     return false;
-//   }
-// }
-// async function dbUpdateMany(params, callback) {
-//   if (!checkDatabaseReady()) return;
-//   if (!checkParams(params))
-//     return console.log(
-//       `[MongoDB][ERROR] exports.update: Invalid params object.`
-//     );
-
-//   let collection = getParamsCollection(params);
-//   if (!collection)
-//     return console.log(
-//       `[MongoDB][ERROR] exports.insert: Invalid collection "${params.collection}"`
-//     );
-
-//   query = safeObjectArgument(params.query);
-//   update = safeObjectArgument(params.update);
-//   options = safeObjectArgument(params.options);
-
-//   const cb = (err, res) => {
-//     if (err) {
-//       console.log(`[MongoDB][ERROR] exports.update: Error "${err.message}".`);
-//       safeCallback(callback, false, err.message);
-//       return;
-//     }
-//     safeCallback(callback, true, res.result.nModified);
-//   };
-//   try {
-//     return await collection.updateMany(query, update, options, cb);
-//   } catch (error) {
-//     console.log(`[MongoDB][ERROR] updateMany: Error "${err.message}".`);
-//     return false;
-//   }
-// }
-// /**
-//  * MongoDB count method
-//  * @param {Object} params - Params object
-//  * @param {Object} params.query - Query object.
-//  * @param {Object} params.options - Options passed to insert.
-//  */
-// async function dbCount(params, callback) {
-//   if (!checkDatabaseReady()) return;
-//   if (!checkParams(params))
-//     return console.log(
-//       `[MongoDB][ERROR] exports.count: Invalid params object.`
-//     );
-
-//   let collection = getParamsCollection(params);
-//   if (!collection)
-//     return console.log(
-//       `[MongoDB][ERROR] exports.insert: Invalid collection "${params.collection}"`
-//     );
-
-//   const query = safeObjectArgument(params.query);
-//   const options = safeObjectArgument(params.options);
-//   try {
-//     await collection.countDocuments(query, options, (err, count) => {
-//       if (err) {
-//         console.log(`[MongoDB][ERROR] exports.count: Error "${err.message}".`);
-//         safeCallback(callback, false, err.message);
-//         return;
-//       }
-//       safeCallback(callback, true, count);
-//     });
-//   } catch (error) {
-//     console.log(`[MongoDB][ERROR] exports.count: Error "${err.message}".`);
-//   }
-// }
-
-// /**
-//  * MongoDB delete method
-//  * @param {Object} params - Params object
-//  * @param {Object} params.query - Query object.
-//  * @param {Object} params.options - Options passed to insert.
-//  */
-// async function dbDeleteMultiple(params, callback) {
-//   if (!checkDatabaseReady()) return;
-//   if (!checkParams(params))
-//     return console.log(
-//       `[MongoDB][ERROR] exports.delete: Invalid params object.`
-//     );
-
-//   let collection = getParamsCollection(params);
-//   if (!collection)
-//     return console.log(
-//       `[MongoDB][ERROR] exports.insert: Invalid collection "${params.collection}"`
-//     );
-
-//   const query = safeObjectArgument(params.query);
-//   const options = safeObjectArgument(params.options);
-
-//   const cb = (err, res) => {
-//     if (err) {
-//       console.log(`[MongoDB][ERROR] exports.delete: Error "${err.message}".`);
-//       safeCallback(callback, false, err.message);
-//       return;
-//     }
-//     safeCallback(callback, true, res.result.n);
-//   };
-//   try {
-//     await collection.deleteMany(query, options, cb);
-//   } catch (error) {
-//     console.log(`[MongoDB][ERROR] Error on DeleteOne "${err.message}".`);
-//   }
-//   process._tickCallback();
-// }
-
-// async function dbDeleteOne(params, callback) {
-//   if (!checkDatabaseReady()) return;
-//   if (!checkParams(params))
-//     return console.log(
-//       `[MongoDB][ERROR] exports.delete: Invalid params object.`
-//     );
-
-//   let collection = getParamsCollection(params);
-//   if (!collection)
-//     return console.log(
-//       `[MongoDB][ERROR] exports.insert: Invalid collection "${params.collection}"`
-//     );
-
-//   const query = safeObjectArgument(params.query);
-//   const options = safeObjectArgument(params.options);
-
-//   const cb = (err, res) => {
-//     if (err) {
-//       console.log(`[MongoDB][ERROR] exports.delete: Error "${err.message}".`);
-//       safeCallback(callback, false, err.message);
-//       return;
-//     }
-//     safeCallback(callback, true, res.result.n);
-//   };
-//   try {
-//     await collection.deleteOne(query, options, cb);
-//   } catch (error) {
-//     console.log(`[MongoDB][ERROR] Error on DeleteOne "${err.message}".`);
-//     return;
-//   }
-// }
-
-// /* Exports definitions */
-
-// exports("isConnected", () => !!db);
-
-// exports("insert", dbInsert);
-
-// exports("insertOne", (params, callback) => {
-//   if (checkParams(params)) {
-//     params.documents = [params.document];
-//     params.document = null;
-//   }
-//   return dbInsert(params, callback);
-// });
-
-// exports("find", dbFind);
-
-// exports("findOne", (params, callback) => {
-//   if (checkParams(params)) params.limit = 1;
-//   return dbFind(params, callback);
-// });
-
-// exports("update", dbUpdate);
-
-// exports("updateOne", (params, callback) => {
-//   return dbUpdateOne(params, callback);
-// });
-// exports("updateMany", (params, callback) => {
-//   return dbUpdateMany(params, callback);
-// });
-// exports("count", dbCount);
-
-// exports("delete", dbDelete);
-
-// exports("deleteOne", (params, callback) => {
-//   return dbDeleteOne(params, callback);
-// });
-
-// exports("deleteMultiple", (params, callback) => {
-//   return dbDeleteMultiple(params, callback);
-// });
-function exportDocuments(documents) {
-  if (!Array.isArray(documents)) return;
-  return documents.map((document) => exportDocument(document));
-}
