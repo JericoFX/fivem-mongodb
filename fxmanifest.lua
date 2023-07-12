@@ -7,8 +7,6 @@ description 'MongoDB wrapper for FiveM'
 version '1.0.0'
 
 server_only 'yes'
-
 server_scripts {
-    "index.js",
-    --"example.lua"
+    "index.js"
 }
